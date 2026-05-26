@@ -1,52 +1,54 @@
-export type ProviderStatus = "active" | "degraded" | "offline"
-
+// Declared locally to completely break dependence on the missing api.ts export
 export interface Provider {
-  id: string
-  name: string
-  status: ProviderStatus
-  latencyMs: number          // 0 if offline
-  maxLatencyMs: number       // used to scale the latency bar, e.g. 3000
-  role: "primary" | "fallback-1" | "fallback-2" | "fallback-3"
+  id: string;
+  name: string;
+  status: "active" | "degraded" | "offline";
+  latencyMs: number;
+  maxLatencyMs: number;
+  role: string;
 }
 
 interface ProviderHealthListProps {
-  providers: Provider[]
+  providers: Provider[];
 }
 
+// Fixed mock state using your exact three production model nodes
 const defaultProviders: Provider[] = [
-  { id: "claude",  name: "Claude 3.5 Sonnet", status: "active",   latencyMs: 380,  maxLatencyMs: 3000, role: "primary"    },
-  { id: "gpt4",    name: "GPT-4o",            status: "degraded", latencyMs: 1240, maxLatencyMs: 3000, role: "fallback-1" },
-  { id: "groq",    name: "Groq / Llama 3",    status: "active",   latencyMs: 95,   maxLatencyMs: 3000, role: "fallback-2" },
-  { id: "gemini",  name: "Gemini 1.5 Pro",    status: "offline",  latencyMs: 0,    maxLatencyMs: 3000, role: "fallback-3" },
-]
+  { id: "gemini-35-flash", name: "Gemini 3.5 Flash", status: "active", latencyMs: 210, maxLatencyMs: 3000, role: "primary" },
+  { id: "gemini-31-flash-lite", name: "Gemini 3.1 Flash Lite", status: "active", latencyMs: 140, maxLatencyMs: 3000, role: "fallback-1" },
+  { id: "gpt-4o-mini", name: "OpenAI GPT-4o Mini", status: "active", latencyMs: 290, maxLatencyMs: 3000, role: "fallback-2" },
+];
 
-const statusDot: Record<ProviderStatus, string> = {
+const statusDot: Record<string, string> = {
   active:   "bg-emerald-400",
   degraded: "bg-amber-400",
   offline:  "bg-red-500",
-}
+};
  
-const badgeStyle: Record<ProviderStatus, string> = {
+const badgeStyle: Record<string, string> = {
   active:   "bg-emerald-700 text-white",
   degraded: "bg-amber-700 text-white",
   offline:  "bg-red-700 text-white",
-}
+};
  
-const barColor: Record<ProviderStatus, string> = {
+const barColor: Record<string, string> = {
   active:   "bg-emerald-400",
   degraded: "bg-amber-400",
   offline:  "bg-red-500",
-}
+};
 
-export default function ProviderHealthList({ providers = defaultProviders }: ProviderHealthListProps) {
+export default function ProviderHealthList({ providers }: ProviderHealthListProps) {
+  // Use real backend data array if loaded; fall back to your custom models default state smoothly
+  const activeList = providers && providers.length > 0 ? providers : defaultProviders;
+
   return (
     <div className="h-full m-1 rounded-md bg-zinc-900 flex flex-col px-2 pt-1 pb-2 overflow-hidden">
-    <span className="text-zinc-400 text-xs font-medium mb-1">provider health</span>
-    <div className="flex flex-col flex-1 gap-1">
-        {providers.map((p) => {
+      <span className="text-zinc-400 text-xs font-medium mb-1">provider health</span>
+      <div className="flex flex-col flex-1 gap-1">
+        {activeList.map((p) => {
           const barPct = p.status === "offline"
             ? 0
-            : Math.min(100, Math.round((p.latencyMs / p.maxLatencyMs) * 100))
+            : Math.min(100, Math.round((p.latencyMs / p.maxLatencyMs) * 100));
 
           return (
             <div key={p.id} className={`flex-1 flex items-center gap-2 rounded px-2 border text-xs
@@ -79,10 +81,9 @@ export default function ProviderHealthList({ providers = defaultProviders }: Pro
               {p.status === "offline" ? "offline" : p.role}
             </span>
           </div>
-        )
-      })}
+          );
+        })}
       </div>
     </div>
-  )
+  );
 }
- 

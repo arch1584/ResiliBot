@@ -4,3 +4,5 @@ sse-starlette
 pydantic
 openai
 python-dotenv
+tavily-python
+pydantic-settings

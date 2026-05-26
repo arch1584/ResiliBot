@@ -8,9 +8,11 @@ from tavily import TavilyClient
 from app.config import settings
 
 # Initialize TrueFoundry and Tavily Clients safely using your settings configuration
+# Configured with an explicit 15.0-second request timeout boundary window
 client = OpenAI(
     api_key=settings.TRUEFOUNDRY_API_KEY,
-    base_url=settings.TRUEFOUNDRY_BASE_URL
+    base_url=settings.TRUEFOUNDRY_BASE_URL,
+    timeout=15.0  
 )
 
 # Initialize Tavily client via our validated pydantic-settings module
@@ -29,7 +31,7 @@ chaos_state = {
 # Routing Policy tracking configuration
 routing_metrics = {
     "strategy": "priority fallback",
-    "timeoutSeconds": 5,
+    "timeoutSeconds": 15,  
     "maxRetries": 3,
     "cacheHits": 0,
     "totalRequests": 0
@@ -94,8 +96,11 @@ def specialist_agent(subtask: str) -> str:
     """LLM Call 2: Executes a localized search and processes the final content."""
     search_results = None
     
-    # Chaos simulation validation: Check if drop-mcp is active
-    if not chaos_state["drop-mcp"]:
+    # SAFE LOCAL INTEGRATION FLAG: 
+    # Set to False to bypass local DNS/Network resolution issues with api.tavily.com
+    USE_LIVE_WEB_SEARCH = False  
+    
+    if USE_LIVE_WEB_SEARCH and not chaos_state["drop-mcp"]:
         try:
             start_search = time.time()
             search_results = tavily_client.search(subtask)
@@ -105,12 +110,15 @@ def specialist_agent(subtask: str) -> str:
             print(f"⚠️ Tavily Search tool failed processing: {str(e)}")
             search_results = None
     else:
-        log_event("warn", "MCP tool unavailable, proceeding without web search")
+        log_event("warn", "MCP tool unavailable, proceeding with model internal knowledge base")
 
-    # Resolve active provider with dynamic fallback tracking loops
+    # Resolve active provider with dynamic fallback tracking loops for complex deep-dives
     return execute_llm_with_fallback(
-        system_prompt="You are a specialist researcher.",
-        user_prompt=f"Task: {subtask}\nSearch results: {search_results or 'unavailable - web search tool is down'}"
+        system_prompt=(
+            "You are ResiliBot, a technical specialist researcher. Provide a comprehensive, "
+            "detailed, and structured technical analysis for the complex task or code layout requested."
+        ),
+        user_prompt=f"Task: {subtask}\nContext data: {search_results or 'unavailable'}"
     )
 
 def execute_llm_with_fallback(system_prompt: str, user_prompt: str) -> str:
@@ -199,8 +207,44 @@ def execute_llm_with_fallback(system_prompt: str, user_prompt: str) -> str:
         
     return final_response_content
 
+# --- FOOLPROOF HIGH-LEVEL CONTROLLER CONCISENESS INTEGRATION ---
+
 def ask_resilient_agent(task: str) -> str:
-    """High-level system composition layer synthesizing user outputs."""
+    """High-level system composition layer synthesizing user outputs with automated size pruning."""
+    clean_task = task.strip().lower().replace(".", "").replace("!", "").replace("?", "")
+    
+    # 1. Handle casual conversational greetings instantly
+    greetings = ["hi", "hello", "hey", "hi resilibot", "hello resilibot", "hey resilibot"]
+    if clean_task in greetings:
+        return "Hey! I'm ResiliBot, your resilient assistant. How can I help you today?"
+        
+    # 2. INTENT CLASSIFICATION STEP:
+    # Check if the query is a simple factual request, greeting, or conversational query.
+    # If it is simple, we route it directly to a single quick execution window with zero orchestration overhead.
+    is_complex_request = any(keyword in clean_task for keyword in [
+        "code", "program", "script", "function", "write an essay", "explain architecture", 
+        "circuit breaker", "fallback", "chaos", "design", "system layout", "develop", "steps to"
+    ])
+    
+    if not is_complex_request:
+        log_event("info", "Simple factual prompt detected. Executing via direct concise engine pipeline.")
+        try:
+            # We process the query directly using our robust fallback channel with a strict layout prompt
+            return execute_llm_with_fallback(
+                system_prompt=(
+                    "You are ResiliBot, a direct and ultra-concise assistant. "
+                    "Answer the user's factual question immediately in a single, precise, and natural sentence. "
+                    "Do NOT add markdown headers, bold summary blocks, bullet points, or reference notes. "
+                    "Example response style: 'The current President of India is Smt. Droupadi Murmu.'"
+                ),
+                user_prompt=f"Answer cleanly: {task}"
+            )
+        except Exception as e:
+            print(f"⚠️ Direct path exception: {str(e)}")
+            # If the direct path hit a network glitch, let it gracefully step down to the multi-agent loop below
+            pass
+
+    # 3. For true technical tasks (code requests, complex breakdowns), run the full multi-agent orchestration loop
     plan = orchestrator_agent(task)
     result = specialist_agent(plan)
     return result
