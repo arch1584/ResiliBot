@@ -137,6 +137,7 @@ Create a `.env` file:
 TRUEFOUNDRY_API_KEY=your_key_here
 TRUEFOUNDRY_GATEWAY_URL=https://your-workspace.truefoundry.com/api/llm
 TAVILY_API_KEY=your_key_here
+VIRTUAL_MODEL_NAME=your_virtual_model_name
 ```
 
 ```bash
@@ -161,31 +162,43 @@ Open `http://localhost:5173`
 ResiliBot/
 ├── backend/
 │   ├── main.py               FastAPI app entry point
-│   ├── app/
-│   │   ├── routes.py         API endpoint definitions
-│   │   ├── agents.py         Orchestrator and specialist agent logic
-│   │   ├── metrics.py        In-memory counters and event log
-│   │   └── chaos.py          Chaos state management
-│   └── requirements.txt
+│   └── app/
+│       ├── __init__.py
+│       ├── config.py         Environment variables and settings
+│       ├── llm_client.py     TrueFoundry gateway client and agent logic
+│       └── routes.py         API endpoint definitions
 │
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   │   ├── TopBar.tsx
-    │   │   ├── MainLayout.tsx
-    │   │   ├── LeftPanel.tsx
-    │   │   ├── RightPanel.tsx
-    │   │   └── cards/
-    │   │       ├── MetricCards.tsx
-    │   │       ├── ProviderHealthList.tsx
-    │   │       ├── LatencyGraph.tsx
-    │   │       ├── EventFeed.tsx
-    │   │       ├── ChaosControls.tsx
-    │   │       └── RoutingPolicy.tsx
-    │   ├── services/
-    │   │   └── api.ts        Backend API service layer
-    │   └── dashboardTypes.ts Shared TypeScript interfaces
-    └── package.json
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── cards/
+│   │   │   │   ├── ChaosControls.tsx
+│   │   │   │   ├── EventFeed.tsx
+│   │   │   │   ├── LatencyGraph.tsx
+│   │   │   │   ├── MetricCards.tsx
+│   │   │   │   ├── ProviderHealthList.tsx
+│   │   │   │   └── RoutingPolicy.tsx
+│   │   │   ├── dashboardTypes.ts   Shared TypeScript interfaces
+│   │   │   ├── LeftPanel.tsx
+│   │   │   ├── MainLayout.tsx
+│   │   │   ├── RightPanel.tsx
+│   │   │   └── TopBar.tsx
+│   │   ├── services/
+│   │   │   └── api.ts              Backend API service layer
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tsconfig.json
+│
+├── .env                      Environment variables (not committed)
+├── .gitignore
+├── LICENSE
+├── README.md
+└── requirements.txt
 ```
 
 ---
