@@ -21,12 +21,12 @@ const defaultMetrics: Metrics = {
 
 function Card({ label, value, subtext }: { label: string; value: string | number; subtext?: string }) {
   return (
-    <div className="flex-1 min-w-[120px] bg-zinc-800 border border-zinc-700 rounded p-2 flex flex-col justify-between">
-      <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider">{label}</span>
+    <div className="flex-1 min-w-0 bg-zinc-800 border border-zinc-700 rounded p-2 flex flex-col justify-between overflow-hidden">
+      <span className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider truncate">{label}</span>
       <div className="my-1">
-        <span className="text-zinc-100 text-lg font-semibold font-mono">{value}</span>
+        <span className="text-zinc-100 text-lg font-semibold font-mono truncate block">{value}</span>
       </div>
-      {subtext && <span className="text-zinc-400 text-[10px] italic">{subtext}</span>}
+      {subtext && <span className="text-zinc-400 text-[10px] italic truncate">{subtext}</span>}
     </div>
   );
 }
@@ -38,7 +38,7 @@ export default function MetricCards({ metrics }: MetricCardsProps) {
   return (
     <div className="m-1 rounded-md bg-zinc-900 p-2 flex flex-col overflow-hidden shrink-0">
       <span className="text-zinc-400 text-xs font-medium mb-2">system metrics</span>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-hidden">
         <Card 
           label="requests served" 
           value={activeMetrics.requestsServed.toLocaleString()} 

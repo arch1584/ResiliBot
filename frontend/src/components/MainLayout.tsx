@@ -18,6 +18,7 @@ export default function MainLayout() {
   const [events, setEvents] = useState<FeedEvent[]>([]);
   const [routingConfig, setRoutingConfig] = useState<RoutingConfig | null>(null);
   const [metrics, setMetrics] = useState<any>(null); // Cast as 'any' to bypass shape strictness errors
+  const [latencyHistory, setLatencyHistory] = useState<any[]>([]);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -51,6 +52,9 @@ export default function MainLayout() {
           avgLatencyMs: metricsData?.avgLatencyMs || 0,
           uptimePct: (metricsData as any)?.uptimePct || 100
         });
+
+        const latencyData = await apiService.getLatencyHistory();
+        setLatencyHistory(latencyData);
 
       } catch (error) {
         console.error("Dashboard engine status synchronization sync failed:", error);
@@ -113,10 +117,10 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-zinc-800 text-white overflow-hidden">
+    <div className="flex flex-col h-screen bg-zinc-800 text-white overflow-hidden">
       <TopBar status={getSystemStatus()} />
       
-      <div className="flex flex-1 overflow-hidden p-1 gap-1 min-h-0">
+      <div className="flex flex-1 overflow-hidden p-1 gap-2 min-h-0">
         <div className="flex-[3] h-full min-h-0">
           <LeftPanel 
             providers={providers}
@@ -125,6 +129,7 @@ export default function MainLayout() {
             routingConfig={routingConfig}
             metrics={metrics}
             onToggleChaos={handleToggleChaos}
+            latencyHistory={latencyHistory}
           />
         </div>
         <div className="flex-[2] h-full min-h-0">

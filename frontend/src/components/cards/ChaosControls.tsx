@@ -55,7 +55,7 @@ export default function ChaosControls({ toggles, onToggle }: ChaosControlsProps)
   return (
     <div className="h-full m-1 rounded-md bg-zinc-900 flex flex-col px-2 pt-1 pb-2 overflow-hidden">
       <div className="flex items-center gap-2 mb-2 shrink-0">
-        <span className="text-zinc-400 text-xs font-medium">chaos controls</span>
+        <span className="text-zinc-400 text-xs font-medium w-full">chaos controls</span>
         {anyActive && (
           <span className="text-xs px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-800 animate-pulse font-mono">
             CHAOS ACTIVE

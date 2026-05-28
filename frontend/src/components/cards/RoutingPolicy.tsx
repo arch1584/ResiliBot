@@ -23,7 +23,7 @@ const defaultConfig: RoutingConfig = {
  
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-1 justify-between items-center border-b py-1 border-zinc-800 last:border-0">
+    <div className="flex justify-between items-center border-b py-1 border-zinc-800 last:border-0">
       <span className="text-zinc-500 text-xs">{label}</span>
       <span className="text-zinc-200 text-xs font-medium">{value}</span>
     </div>
@@ -38,14 +38,16 @@ export default function RoutingPolicy({ config }: RoutingPolicyProps) {
     : 0;
  
   return (
-    <div className="h-full shrink-0 m-1 rounded-md bg-zinc-900 px-2 pt-1">
+    <div className="h-full m-1 rounded-md bg-zinc-900 px-2 pt-1 pb-2 flex flex-col">
       <span className="text-zinc-400 text-xs font-medium block">
         active routing policy
       </span>
-      <Row label="strategy"       value={activeConfig.strategy} />
-      <Row label="timeout"        value={`${activeConfig.timeoutSeconds}s`} />
-      <Row label="max retries"    value={String(activeConfig.maxRetries)} />
-      <Row label="cache hits"     value={`${activeConfig.cacheHits} (${cacheHitPct}%)`} />
+      <div className="flex flex-col flex-1 justify-between">
+        <Row label="strategy"       value={activeConfig.strategy} />
+        <Row label="timeout"        value={`${activeConfig.timeoutSeconds}s`} />
+        <Row label="max retries"    value={String(activeConfig.maxRetries)} />
+        <Row label="cache hits"     value={`${activeConfig.cacheHits} (${cacheHitPct}%)`} />
+      </div>
     </div>
   );
 }

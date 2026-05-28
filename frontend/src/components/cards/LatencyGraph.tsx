@@ -54,7 +54,7 @@ const defaultProviders: Provider[] = [
 export default function LatencyGraph({ dataPoints, providers }: LatencyGraphProps) {
   const activePoints = dataPoints && dataPoints.length > 0 ? dataPoints : defaultDataPoints;
   const activeProviders = providers && providers.length > 0 ? providers : defaultProviders;
-
+  console.log(activePoints[0])
   const tickFormatter = (_: string, index: number) =>
     index % 5 === 0 ? activePoints[index]?.time ?? "" : "";
 
@@ -75,8 +75,9 @@ export default function LatencyGraph({ dataPoints, providers }: LatencyGraphProp
               axisLine={{ stroke: "#3f3f46" }}
               tickLine={false}
             />
-            <YAxis unit="ms" tick={{ fill: "#71717a", fontSize: 10 }} axisLine={false} tickLine={false} width={48} />
+            <YAxis unit="ms" tick={{ fill: "#71717a", fontSize: 10 }} axisLine={false} tickLine={false} width={56} domain={[0, 400]} tickCount={5} />
             <Tooltip
+              itemSorter={(item) => -(item.value as number)}
               contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: "6px", fontSize: "12px", color: "#e4e4e7" }}
               labelStyle={{ color: "#a1a1aa", marginBottom: "4px" }}
               formatter={(value: any, name: any) => {
@@ -84,12 +85,7 @@ export default function LatencyGraph({ dataPoints, providers }: LatencyGraphProp
                 return [`${value ?? "—"}ms`, p?.name ?? name];
               }}
             />
-            <Legend
-              formatter={(value) => {
-                const p = activeProviders.find(p => p.id === value);
-                return <span style={{ color: "#a1a1aa", fontSize: "11px" }}>{p?.name ?? value}</span>;
-              }}
-            />
+            
             {activeProviders.map(p => (
               <Line
                 key={p.id}
@@ -105,6 +101,16 @@ export default function LatencyGraph({ dataPoints, providers }: LatencyGraphProp
             ))}
           </LineChart>
         </ResponsiveContainer>
+      </div>
+      {/* custom legend */}
+      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-1 shrink-0">
+        {activeProviders.map(p => (
+          <div key={p.id} className="flex items-center gap-1">
+            <span className="w-3 h-0.5 rounded inline-block shrink-0"
+              style={{ background: providerColors[p.id] ?? "#a1a1aa" }} />
+            <span className="text-zinc-400 text-[10px] truncate">{p.name}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
